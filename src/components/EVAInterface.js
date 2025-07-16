@@ -25,7 +25,7 @@ export class EVAInterface {
                         </div>
                         <div class="eva-title">
                             <h1>Enhanced Virtual Assistant</h1>
-                            <p class="eva-tagline">Your Living AI • Always Learning • Always There</p>
+                            <p class="eva-tagline">Your Personal AI • Learning About You • Always Offline-Ready</p>
                         </div>
                     </div>
                     
@@ -38,7 +38,7 @@ export class EVAInterface {
                         </button>
                         <div class="eva-status" id="evaStatus">
                             <span class="status-indicator ${this.eva.isActive ? 'online' : 'offline'}"></span>
-                            <span class="status-text">${this.eva.isActive ? 'Online' : 'Offline'}</span>
+                            <span class="status-text">${this.eva.isActive ? 'Personal Mode' : 'Offline'}</span>
                         </div>
                     </div>
                 </header>
@@ -56,7 +56,7 @@ export class EVAInterface {
                                 <input 
                                     type="text" 
                                     id="chatInput" 
-                                    placeholder="Talk to EVA... (or press Ctrl+Shift+E)"
+                                    placeholder="Talk to your personal EVA... (Ctrl+Shift+E)"
                                     autocomplete="off"
                                 />
                                 <button class="send-btn" id="sendBtn">
@@ -66,10 +66,10 @@ export class EVAInterface {
                                 </button>
                             </div>
                             <div class="input-suggestions" id="inputSuggestions">
-                                <button class="suggestion-btn">Tell me about yourself</button>
-                                <button class="suggestion-btn">What can you do?</button>
                                 <button class="suggestion-btn">Remember that I like coffee</button>
-                                <button class="suggestion-btn">Search for AI news</button>
+                                <button class="suggestion-btn">What do you know about me?</button>
+                                <button class="suggestion-btn">I'm working on a new project</button>
+                                <button class="suggestion-btn">How are you learning about me?</button>
                             </div>
                         </div>
                     </div>
@@ -77,51 +77,69 @@ export class EVAInterface {
                     <!-- Side Panel -->
                     <aside class="eva-sidebar">
                         <div class="sidebar-section">
-                            <h3>🧠 Memory</h3>
+                            <h3>🧠 Personal Memory</h3>
                             <div class="memory-stats">
                                 <div class="stat">
                                     <span class="stat-value" id="memoryCount">0</span>
-                                    <span class="stat-label">Memories</span>
+                                    <span class="stat-label">Personal Facts</span>
                                 </div>
                                 <div class="stat">
                                     <span class="stat-value" id="learningProgress">0%</span>
-                                    <span class="stat-label">Learning</span>
+                                    <span class="stat-label">Adaptation</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="sidebar-section">
-                            <h3>🎯 Quick Actions</h3>
-                            <div class="quick-actions">
-                                <button class="action-btn" data-action="help">Help</button>
-                                <button class="action-btn" data-action="status">Status</button>
-                                <button class="action-btn" data-action="clear">Clear Chat</button>
-                                <button class="action-btn" data-action="export">Export Data</button>
+                            <h3>📊 Personal Insights</h3>
+                            <div class="insights-container" id="personalInsights">
+                                <div class="insight">
+                                    <span class="insight-label">Most Active:</span>
+                                    <span class="insight-value" id="activeTime">Learning...</span>
+                                </div>
+                                <div class="insight">
+                                    <span class="insight-label">Favorite Topic:</span>
+                                    <span class="insight-value" id="favorTopic">Discovering...</span>
+                                </div>
+                                <div class="insight">
+                                    <span class="insight-label">Mood Trend:</span>
+                                    <span class="insight-value" id="moodTrend">Analyzing...</span>
+                                </div>
                             </div>
                         </div>
 
                         <div class="sidebar-section">
-                            <h3>⚡ Capabilities</h3>
+                            <h3>🎯 Personal Actions</h3>
+                            <div class="quick-actions">
+                                <button class="action-btn" data-action="insights">My Insights</button>
+                                <button class="action-btn" data-action="memories">My Memories</button>
+                                <button class="action-btn" data-action="clear">Clear Chat</button>
+                                <button class="action-btn" data-action="export">Export Personal Data</button>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <h3>⚡ Personal Capabilities</h3>
                             <div class="capabilities">
                                 <div class="capability">
                                     <span class="capability-icon">🗣️</span>
-                                    <span class="capability-text">Natural Conversation</span>
+                                    <span class="capability-text">Personal Conversation</span>
                                 </div>
                                 <div class="capability">
                                     <span class="capability-icon">🧠</span>
-                                    <span class="capability-text">Self-Learning Memory</span>
+                                    <span class="capability-text">Learns About You</span>
                                 </div>
                                 <div class="capability">
-                                    <span class="capability-icon">🌐</span>
-                                    <span class="capability-text">Web Knowledge Mining</span>
+                                    <span class="capability-icon">💾</span>
+                                    <span class="capability-text">Offline Knowledge</span>
                                 </div>
                                 <div class="capability">
                                     <span class="capability-icon">🎨</span>
-                                    <span class="capability-text">Creative Generation</span>
+                                    <span class="capability-text">Personal Creativity</span>
                                 </div>
                                 <div class="capability">
-                                    <span class="capability-icon">⚡</span>
-                                    <span class="capability-text">Task Automation</span>
+                                    <span class="capability-icon">🎯</span>
+                                    <span class="capability-text">Adapts to You</span>
                                 </div>
                             </div>
                         </div>
@@ -131,10 +149,10 @@ export class EVAInterface {
                 <!-- Footer -->
                 <footer class="eva-footer">
                     <div class="footer-content">
-                        <p>EVA v1.0 - Enhanced Virtual Assistant for Otieno</p>
+                        <p>EVA v1.0 - Personal AI Assistant for Otieno • Offline-Capable • Always Learning About You</p>
                         <div class="footer-links">
                             <button class="footer-link" id="aboutBtn">About</button>
-                            <button class="footer-link" id="settingsBtn">Settings</button>
+                            <button class="footer-link" id="settingsBtn">Personal Settings</button>
                             <button class="footer-link" id="privacyBtn">Privacy</button>
                         </div>
                     </div>
@@ -220,6 +238,9 @@ export class EVAInterface {
         try {
             // Process with EVA
             const response = await this.eva.processInput(message);
+            
+            // Learn from the input
+            await this.eva.knowledge.learnFromInput(message, this.currentContext);
             
             // Remove typing indicator
             this.hideTypingIndicator();
@@ -333,12 +354,12 @@ export class EVAInterface {
 
     handleQuickAction(action) {
         switch (action) {
-            case 'help':
-                document.getElementById('chatInput').value = 'help';
+            case 'insights':
+                document.getElementById('chatInput').value = 'show me my personal insights';
                 this.handleUserInput();
                 break;
-            case 'status':
-                document.getElementById('chatInput').value = 'status';
+            case 'memories':
+                document.getElementById('chatInput').value = 'what do you remember about me?';
                 this.handleUserInput();
                 break;
             case 'clear':
@@ -346,31 +367,43 @@ export class EVAInterface {
                 this.updateChatDisplay();
                 break;
             case 'export':
-                this.exportData();
+                this.exportPersonalData();
                 break;
         }
     }
 
-    exportData() {
+    exportPersonalData() {
         const data = {
+            type: 'EVA Personal Data Export',
+            user: 'Otieno',
             messages: this.messages,
             userProfile: this.eva.userProfile,
-            timestamp: new Date()
+            personalInsights: this.eva.personalDB ? this.eva.personalDB.getPersonalInsights() : null,
+            knowledgeStats: this.eva.knowledge ? this.eva.knowledge.getKnowledgeStats() : null,
+            timestamp: new Date(),
+            exportNote: 'This is your personal EVA data - completely private and offline'
         };
         
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `eva-data-${Date.now()}.json`;
+        a.download = `eva-personal-data-otieno-${Date.now()}.json`;
         a.click();
         URL.revokeObjectURL(url);
+        
+        this.addMessage({
+            type: 'system',
+            content: '📁 Your personal EVA data has been exported. This contains everything I know about you and our conversations.',
+            timestamp: new Date()
+        });
     }
 
     startStatusUpdates() {
         setInterval(() => {
             this.updateStats();
             this.updateStatus();
+            this.updatePersonalInsights();
         }, 5000);
     }
 
@@ -379,11 +412,40 @@ export class EVAInterface {
         const learningProgress = document.getElementById('learningProgress');
         
         if (memoryCount) {
-            memoryCount.textContent = this.eva.memory.getMemoryCount();
+            const knowledgeCount = this.eva.knowledge ? this.eva.knowledge.getKnowledgeCount() : 0;
+            memoryCount.textContent = knowledgeCount;
         }
         
         if (learningProgress) {
-            learningProgress.textContent = '85%'; // Placeholder
+            const adaptationLevel = this.eva.calculateAdaptationLevel ? this.eva.calculateAdaptationLevel() : 0;
+            learningProgress.textContent = `${Math.round(adaptationLevel)}%`;
+        }
+    }
+    
+    async updatePersonalInsights() {
+        if (!this.eva.personalDB) return;
+        
+        try {
+            const insights = await this.eva.personalDB.getPersonalInsights();
+            
+            const activeTimeEl = document.getElementById('activeTime');
+            const favoriteTopicEl = document.getElementById('favorTopic');
+            const moodTrendEl = document.getElementById('moodTrend');
+            
+            if (activeTimeEl) {
+                activeTimeEl.textContent = insights.mostActiveTime || 'Learning...';
+            }
+            
+            if (favoriteTopicEl) {
+                const topTopic = insights.favoriteTopics?.[0];
+                favoriteTopicEl.textContent = topTopic ? topTopic.topic : 'Discovering...';
+            }
+            
+            if (moodTrendEl) {
+                moodTrendEl.textContent = insights.sentimentTrend || 'Analyzing...';
+            }
+        } catch (error) {
+            console.warn('Could not update personal insights:', error);
         }
     }
 
@@ -394,7 +456,7 @@ export class EVAInterface {
         
         if (this.eva.isActive) {
             statusIndicator.className = 'status-indicator online';
-            statusText.textContent = 'Online';
+            statusText.textContent = 'Personal Mode';
             avatar.classList.add('active');
         } else {
             statusIndicator.className = 'status-indicator offline';
@@ -420,7 +482,7 @@ export class EVAInterface {
         
         this.addMessage({
             type: 'system',
-            content: '⚡ EVA activated via keyboard shortcut. How can I help?',
+            content: '⚡ Your personal EVA is ready, Otieno. What would you like to talk about?',
             timestamp: new Date()
         });
     }
