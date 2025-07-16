@@ -15,7 +15,6 @@
     "socket.io": "^4.7.4",
     "node-cron": "^3.0.3",
     "axios": "^1.6.2",
-    "cheerio": "^1.0.0-rc.12",
     "openai": "^4.20.1"
   },
   "devDependencies": {
