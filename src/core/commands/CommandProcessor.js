@@ -50,6 +50,17 @@ export class CommandProcessor {
             pattern: /^(chat|talk|tell me)/i,
             handler: this.handleChat.bind(this)
         });
+
+        // Voice commands
+        this.commands.set('voice', {
+            pattern: /^(change voice|switch voice|voice settings)/i,
+            handler: this.handleVoice.bind(this)
+        });
+
+        this.commands.set('speech_speed', {
+            pattern: /^(speak (slower|faster)|speech speed)/i,
+            handler: this.handleSpeechSpeed.bind(this)
+        });
     }
 
     async parse(input) {
@@ -167,6 +178,24 @@ I'm here, learning about you, and ready to help with anything you need, Otieno.`
             type: 'chat',
             message: command.input,
             requiresResponse: true
+        };
+    }
+
+    async handleVoice(command) {
+        return {
+            type: 'voice_control',
+            action: 'change_voice',
+            message: '🎤 Changing voice...'
+        };
+    }
+
+    async handleSpeechSpeed(command) {
+        const speed = command.input.toLowerCase().includes('slower') ? 'slower' : 'faster';
+        return {
+            type: 'voice_control',
+            action: 'adjust_speed',
+            speed: speed,
+            message: `🎤 Adjusting speech speed to ${speed}...`
         };
     }
 }

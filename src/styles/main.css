@@ -143,6 +143,11 @@ body {
   color: white;
 }
 
+.control-btn.speaking {
+  background: var(--success);
+  animation: pulse 1s infinite;
+}
+
 .eva-status {
   display: flex;
   align-items: center;

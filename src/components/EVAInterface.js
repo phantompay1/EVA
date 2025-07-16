@@ -253,6 +253,11 @@ export class EVAInterface {
                 if (response.action) {
                     await this.handleResponseAction(response);
                 }
+                
+                // Handle voice control actions
+                if (response.type === 'voice_control') {
+                    await this.handleVoiceAction(response);
+                }
             }
         } catch (error) {
             this.hideTypingIndicator();
@@ -284,6 +289,22 @@ export class EVAInterface {
                         timestamp: new Date()
                     });
                 }, 1000);
+                break;
+        }
+    }
+
+    async handleVoiceAction(response) {
+        switch (response.action) {
+            case 'change_voice':
+                this.changeVoice();
+                break;
+            case 'adjust_speed':
+                // This would be implemented to adjust TTS speed
+                this.addMessage({
+                    type: 'system',
+                    content: `🎤 Speech speed adjustment to "${response.speed}" will be implemented in voice settings.`,
+                    timestamp: new Date()
+                });
                 break;
         }
     }
