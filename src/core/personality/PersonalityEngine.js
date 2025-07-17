@@ -88,7 +88,7 @@ export class PersonalityEngine {
         // Analyze message sentiment and context
         const sentiment = this.analyzeSentiment(message);
         const topics = this.extractTopics(message);
-        const personalRelevance = this.assessPersonalRelevance(message);
+        const personalRelevance = this.assessPersonalRelevance(message, sentiment, topics);
         
         // Generate contextual response
         let response = this.generatePersonalContextualResponse(message, sentiment, topics, personalRelevance);
@@ -102,7 +102,7 @@ export class PersonalityEngine {
         };
     }
 
-    assessPersonalRelevance(message) {
+    assessPersonalRelevance(message, sentiment, topics) {
         let relevance = 0.3; // Base relevance
         
         // Check for personal pronouns and context
