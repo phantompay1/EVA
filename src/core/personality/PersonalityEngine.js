@@ -166,6 +166,11 @@ export class PersonalityEngine {
     assessPersonalRelevance(message, sentiment, topics) {
         let relevance = 0.3; // Base relevance
         
+        // Ensure message is a string
+        if (!message || typeof message !== 'string') {
+            return relevance;
+        }
+        
         // Check for personal pronouns and context
         if (message.toLowerCase().includes('i ') || message.toLowerCase().includes('my ')) {
             relevance += 0.4;
@@ -177,6 +182,9 @@ export class PersonalityEngine {
         }
         
         // Check for personal topics
+        if (!topics || !Array.isArray(topics)) {
+            topics = [];
+        }
         const personalTopics = ['personal', 'work', 'creativity'];
         if (topics.some(topic => personalTopics.includes(topic))) {
             relevance += 0.3;
