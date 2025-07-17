@@ -198,7 +198,7 @@ export class PersonalityEngine {
         const positiveWords = ['good', 'great', 'awesome', 'excellent', 'love', 'like', 'happy', 'excited', 'amazing', 'wonderful', 'fantastic', 'brilliant'];
         const negativeWords = ['bad', 'terrible', 'hate', 'dislike', 'sad', 'angry', 'frustrated', 'annoying', 'awful', 'horrible', 'disappointed', 'upset'];
         
-        const words = text.toLowerCase().split(/\s+/);
+        const words = (text || '').toLowerCase().split(/\s+/);
         let score = 0;
         
         words.forEach(word => {
@@ -219,7 +219,7 @@ export class PersonalityEngine {
             personal: ['feel', 'think', 'life', 'personal', 'family', 'friend', 'relationship', 'myself', 'i am', 'i feel']
         };
         
-        const textLower = text.toLowerCase();
+        const textLower = (text || '').toLowerCase();
         
         Object.entries(topicKeywords).forEach(([topic, keywords]) => {
             if (keywords.some(keyword => textLower.includes(keyword))) {
