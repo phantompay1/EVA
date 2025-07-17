@@ -64,16 +64,30 @@ export class CommandProcessor {
     }
 
     async parse(input) {
+        if (!input || typeof input !== 'string') {
+            return {
+                type: 'error',
+                input: input || '',
+                handler: this.handleError.bind(this),
+                params: { error: 'Invalid input' }
+            };
+        }
+        
         const inputLower = input.toLowerCase().trim();
         
         for (const [name, command] of this.commands) {
-            if (command.pattern.test(inputLower)) {
-                return {
-                    type: name,
-                    input: input,
-                    handler: command.handler,
-                    params: this.extractParams(input, command.pattern)
-                };
+            try {
+                if (command.pattern.test(inputLower)) {
+                    return {
+                        type: name,
+                        input: input,
+                        handler: command.handler,
+                        params: this.extractParams(input, command.pattern)
+                    };
+                }
+            } catch (patternError) {
+                console.warn(`Pattern matching error for ${name}:`, patternError);
+                continue;
             }
         }
 
@@ -83,6 +97,14 @@ export class CommandProcessor {
             input: input,
             handler: this.handleChat.bind(this),
             params: { message: input }
+        };
+    }
+
+    async handleError(command) {
+        return {
+            type: 'response',
+            content: `I'm having trouble understanding that input, Otieno. Could you try rephrasing what you need help with?`,
+            timestamp: new Date()
         };
     }
 

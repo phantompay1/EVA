@@ -239,8 +239,12 @@ export class EVAInterface {
             // Process with EVA
             const response = await this.eva.processInput(message);
             
-            // Learn from the input
-            await this.eva.knowledge.learnFromInput(message, this.currentContext);
+            // Learn from the input (with error handling)
+            try {
+                await this.eva.knowledge.learnFromInput(message, this.currentContext);
+            } catch (learningError) {
+                console.warn('Learning error (non-critical):', learningError);
+            }
             
             // Remove typing indicator
             this.hideTypingIndicator();
@@ -251,19 +255,35 @@ export class EVAInterface {
                 
                 // Handle special actions
                 if (response.action) {
-                    await this.handleResponseAction(response);
+                    try {
+                        await this.handleResponseAction(response);
+                    } catch (actionError) {
+                        console.warn('Action handling error (non-critical):', actionError);
+                    }
                 }
                 
                 // Handle voice control actions
                 if (response.type === 'voice_control') {
-                    await this.handleVoiceAction(response);
+                    try {
+                        await this.handleVoiceAction(response);
+                    } catch (voiceError) {
+                        console.warn('Voice action error (non-critical):', voiceError);
+                    }
                 }
+            } else {
+                // Fallback response if no response generated
+                this.addMessage({
+                    type: 'system',
+                    content: 'I\'m processing your message, Otieno. Let me think about this and get back to you.',
+                    timestamp: new Date()
+                });
             }
         } catch (error) {
+            console.error('Processing error:', error);
             this.hideTypingIndicator();
             this.addMessage({
                 type: 'system',
-                content: 'Sorry, I encountered an error processing your request. Please try again.',
+                content: `I'm having trouble processing that right now, Otieno. Let me try a different approach. Can you rephrase what you need help with?`,
                 timestamp: new Date()
             });
         }

@@ -68,6 +68,15 @@ export class EVACore {
     async processInput(input, context = {}) {
         if (!this.isActive) return null;
 
+        // Basic input validation
+        if (!input || typeof input !== 'string') {
+            return {
+                type: 'error',
+                content: 'I need some text to process. What would you like to talk about?',
+                timestamp: new Date()
+            };
+        }
+
         // Update context
         this.currentContext = { 
             ...this.currentContext, 
@@ -77,11 +86,93 @@ export class EVACore {
             offline_mode: true
         };
         
-        // Learn from interaction personally
-        await this.learning.processInteraction(input, this.userProfile);
+        try {
+            // Learn from interaction personally
+            await this.learning.processInteraction(input, this.userProfile);
+        } catch (learningError) {
+            console.warn('Learning system error (non-critical):', learningError);
+        }
         
-        // Process command
-        const command = await this.commandProcessor.parse(input);
+        try {
+            // Process command
+            const command = await this.commandProcessor.parse(input);
+            
+            // Generate personalized response
+            const response = await this.generateResponse(command, input);
+            
+            // Store in personal memory
+            try {
+                await this.memory.storeInteraction({
+                    input,
+                    response,
+                    context: this.currentContext,
+                    timestamp: new Date(),
+                    personal_relevance: this.calculatePersonalRelevance(input)
+                });
+            } catch (memoryError) {
+                console.warn('Memory storage error (non-critical):', memoryError);
+            }
+            
+            // Update personal database
+            try {
+                await this.personalDB.updateFromInteraction(input, response);
+            } catch (dbError) {
+                console.warn('Database update error (non-critical):', dbError);
+            }
+
+            return response;
+        } catch (error) {
+            console.error('Core processing error:', error);
+            
+            // Return a safe fallback response
+            return {
+                type: 'fallback',
+                content: `I understand you're trying to communicate with me, Otieno. I'm here and listening. Could you try rephrasing that, or let me know what specific help you need?`,
+                timestamp: new Date()
+            };
+        }
+    }
+
+    async generateResponse(command, originalInput) {
+        try {
+            const context = {
+                user: this.userProfile,
+                currentContext: this.currentContext,
+                recentMemories: await this.getRecentMemoriesSafe(),
+                personalKnowledge: await this.getPersonalKnowledgeSafe(originalInput),
+                offlineMode: true
+            };
+
+            return await this.personality.generateResponse(command, originalInput, context);
+        } catch (error) {
+            console.error('Response generation error:', error);
+            
+            // Fallback response generation
+            return {
+                type: 'response',
+                content: `I'm processing what you said: "${originalInput}". Let me think about how I can help you with this, Otieno.`,
+                timestamp: new Date()
+            };
+        }
+    }
+
+    async getRecentMemoriesSafe() {
+        try {
+            return await this.memory.getRecentMemories(10);
+        } catch (error) {
+            console.warn('Memory retrieval error:', error);
+            return [];
+        }
+    }
+
+    async getPersonalKnowledgeSafe(input) {
+        try {
+            return await this.knowledge.getRelevantKnowledge(input);
+        } catch (error) {
+            console.warn('Knowledge retrieval error:', error);
+            return [];
+        }
+    }
         
         // Generate personalized response
         const response = await this.generateResponse(command, input);

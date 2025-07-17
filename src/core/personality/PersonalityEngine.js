@@ -151,6 +151,11 @@ export class PersonalityEngine {
                 "Thanks for being open about that. I'm learning more about what matters to you.",
                 "That's really personal - I'm glad you feel comfortable sharing that with me."
             ],
+            recognition: [
+                "I can see you're trying to communicate with me. Let me process what you're saying...",
+                "I'm listening and trying to understand. Can you tell me more about what you need?",
+                "I'm here and ready to help. What would you like to talk about or work on together?"
+            ],
             default: [
                 "I'm thinking about what you've said, Otieno. This is interesting...",
                 "Let me consider this carefully and give you a thoughtful response.",
@@ -160,10 +165,14 @@ export class PersonalityEngine {
 
         // Determine response category
         let category = 'default';
-        if (message.toLowerCase().includes('hello') || message.toLowerCase().includes('hi')) {
+        const messageLower = message.toLowerCase();
+        
+        if (messageLower.includes('hello') || messageLower.includes('hi') || messageLower.includes('hey')) {
             category = 'greeting';
         } else if (message.includes('?')) {
             category = 'question';
+        } else if (messageLower.includes('can\'t') || messageLower.includes('not working') || messageLower.includes('error') || messageLower.includes('recognize')) {
+            category = 'recognition';
         } else if (personalRelevance > 0.7) {
             category = 'personal';
         } else if (sentiment > 0.3) {
@@ -189,7 +198,7 @@ export class PersonalityEngine {
             if (negativeWords.includes(word)) score -= 1;
         });
         
-        return score / words.length;
+        return words.length > 0 ? score / words.length : 0;
     }
 
     extractTopics(text) {
