@@ -173,36 +173,6 @@ export class EVACore {
             return [];
         }
     }
-        
-        // Generate personalized response
-        const response = await this.generateResponse(command, input);
-        
-        // Store in personal memory
-        await this.memory.storeInteraction({
-            input,
-            response,
-            context: this.currentContext,
-            timestamp: new Date(),
-            personal_relevance: this.calculatePersonalRelevance(input)
-        });
-        
-        // Update personal database
-        await this.personalDB.updateFromInteraction(input, response);
-
-        return response;
-    }
-
-    async generateResponse(command, originalInput) {
-        const context = {
-            user: this.userProfile,
-            currentContext: this.currentContext,
-            recentMemories: await this.memory.getRecentMemories(10),
-            personalKnowledge: await this.knowledge.getRelevantKnowledge(originalInput),
-            offlineMode: true
-        };
-
-        return await this.personality.generateResponse(command, originalInput, context);
-    }
 
     calculatePersonalRelevance(input) {
         let relevance = 0.5; // Base relevance
