@@ -149,7 +149,7 @@ export class EVACore {
             if (!response || !response.content) {
                 return {
                     type: 'response',
-                    content: `I understand you said "${originalInput}". Let me help you with that, Otieno.`,
+                    content: `I understand you said "${originalInput || 'something'}". Let me help you with that, Otieno.`,
                     timestamp: new Date()
                 };
             }
@@ -166,7 +166,7 @@ export class EVACore {
             // Fallback response generation
             return {
                 type: 'response',
-                content: `I'm having a small technical hiccup, but I'm here for you, Otieno. What would you like to talk about?`,
+                content: `I understand you're trying to communicate with me, Otieno. I'm here and listening. What would you like to talk about?`,
                 timestamp: new Date()
             };
         }

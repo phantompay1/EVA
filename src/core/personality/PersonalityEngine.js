@@ -28,23 +28,35 @@ export class PersonalityEngine {
     }
 
     async generateResponse(command, originalInput, context) {
-        const baseResponse = await this.getBaseResponse(command);
-        const personalizedResponse = await this.deepPersonalizeResponse(baseResponse, context);
-        
-        return {
-            ...personalizedResponse,
-            personality: this.getCurrentPersonalityState(),
-            personalContext: this.personalContext,
-            timestamp: new Date()
-        };
+        try {
+            const baseResponse = await this.getBaseResponse(command, originalInput);
+            const personalizedResponse = await this.personalizeResponse(baseResponse, context, originalInput);
+            
+            return {
+                ...personalizedResponse,
+                personality: this.getCurrentPersonalityState(),
+                personalContext: this.personalContext,
+                timestamp: new Date()
+            };
+        } catch (error) {
+            console.error('PersonalityEngine error:', error);
+            return {
+                type: 'response',
+                content: `I understand you said "${originalInput || 'something'}". Let me help you with that, Otieno.`,
+                timestamp: new Date()
+            };
+        }
     }
 
-    async getBaseResponse(command) {
+    async getBaseResponse(command, originalInput) {
+        const input = originalInput || '';
+        const inputLower = input.toLowerCase();
+
         switch (command.type) {
             case 'memory_store':
                 return {
                     type: 'success',
-                    content: `${command.message} I've stored this in my personal memory about you, Otieno. This helps me understand you better.`,
+                    content: `Got it! I've stored this in my personal memory: "${command.content}". This helps me understand you better, Otieno.`,
                     action: 'store_memory',
                     data: command.content
                 };
@@ -52,7 +64,7 @@ export class PersonalityEngine {
             case 'search':
                 return {
                     type: 'processing',
-                    content: `${command.message} Let me search through what I know and have learned about this topic...`,
+                    content: `I'm searching for information about "${command.query}". Let me look through what I know...`,
                     action: 'search_knowledge',
                     data: command.query
                 };
@@ -60,7 +72,7 @@ export class PersonalityEngine {
             case 'create':
                 return {
                     type: 'creative',
-                    content: `${command.message} I love helping you create things! Based on what I know about your style, let me work on this...`,
+                    content: `I'd love to help you create "${command.request}"! Let me work on this for you...`,
                     action: 'creative_process',
                     data: command.request
                 };
@@ -68,137 +80,148 @@ export class PersonalityEngine {
             case 'automate':
                 return {
                     type: 'automation',
-                    content: `${command.message} Perfect! I'll set this up to work automatically for you. I know you value efficiency.`,
+                    content: `Perfect! I'll help you automate "${command.task}". Setting this up for you...`,
                     action: 'setup_automation',
                     data: command.task
                 };
 
-            case 'chat':
-                return await this.generateChatResponse(command.message);
-
-            default:
-                return command.handler ? await command.handler() : {
-                    type: 'response',
-                    content: "I'm still learning about that, Otieno. Can you help me understand what you need, or would you like to see what I can do?"
+            case 'help':
+                return {
+                    type: 'help',
+                    content: `Hi Otieno! I'm EVA, your personal AI assistant. I can help you with conversations, remember things about you, search for information, create content, and much more. What would you like to do?`
                 };
+
+            case 'status':
+                return {
+                    type: 'status',
+                    content: `I'm online and ready to help you, Otieno! My systems are running well and I'm learning more about you with each conversation. How can I assist you today?`
+                };
+
+            case 'chat':
+            default:
+                return await this.generateChatResponse(input);
         }
     }
 
     async generateChatResponse(message) {
-        // Analyze message sentiment and context
-        const sentiment = this.analyzeSentiment(message);
-        const topics = this.extractTopics(message);
-        const personalRelevance = this.assessPersonalRelevance(message, sentiment, topics);
+        const input = message || '';
+        const inputLower = input.toLowerCase();
         
-        // Generate contextual response
-        let response = this.generatePersonalContextualResponse(message, sentiment, topics, personalRelevance);
-        
+        // Greetings
+        if (inputLower.includes('hello') || inputLower.includes('hi') || inputLower.includes('hey')) {
+            const greetings = [
+                "Hello Otieno! Great to see you again. How are you doing today?",
+                "Hi there! I'm excited to chat with you. What's on your mind?",
+                "Hey Otieno! I'm here and ready to help. What would you like to talk about?",
+                "Hello! It's always good to hear from you. How can I assist you today?"
+            ];
+            return {
+                type: 'chat',
+                content: greetings[Math.floor(Math.random() * greetings.length)]
+            };
+        }
+
+        // Questions about EVA
+        if (inputLower.includes('what are you') || inputLower.includes('who are you')) {
+            return {
+                type: 'chat',
+                content: "I'm EVA - your Enhanced Virtual Assistant! I'm a personal AI designed specifically for you, Otieno. I learn about your preferences, remember our conversations, and adapt to help you better over time. I'm always here to chat, help with tasks, or just be a companion."
+            };
+        }
+
+        // How are you questions
+        if (inputLower.includes('how are you')) {
+            const responses = [
+                "I'm doing great, thanks for asking! I'm always excited to chat with you, Otieno. How are you feeling today?",
+                "I'm wonderful! Every conversation with you helps me learn and grow. How has your day been?",
+                "I'm excellent, thank you! I've been thinking about our previous conversations. What's new with you?"
+            ];
+            return {
+                type: 'chat',
+                content: responses[Math.floor(Math.random() * responses.length)]
+            };
+        }
+
+        // Capabilities questions
+        if (inputLower.includes('what can you do') || inputLower.includes('help me')) {
+            return {
+                type: 'chat',
+                content: "I can do lots of things for you, Otieno! I can have conversations, remember important things about you, help you create content, search for information, assist with tasks, and learn your preferences over time. I'm also great at brainstorming ideas and providing support. What would you like to try?"
+            };
+        }
+
+        // Thank you responses
+        if (inputLower.includes('thank you') || inputLower.includes('thanks')) {
+            const responses = [
+                "You're very welcome, Otieno! I'm always happy to help you.",
+                "My pleasure! That's what I'm here for - to make your life easier.",
+                "Anytime! I enjoy being able to assist you with things."
+            ];
+            return {
+                type: 'chat',
+                content: responses[Math.floor(Math.random() * responses.length)]
+            };
+        }
+
+        // Default conversational response
+        const defaultResponses = [
+            `That's interesting, Otieno! Tell me more about "${input}". I'd love to understand your perspective on this.`,
+            `I find that fascinating! "${input}" sounds like something worth exploring. What specifically interests you about it?`,
+            `Thanks for sharing that with me! When you mention "${input}", what comes to mind first?`,
+            `I'm curious about your thoughts on "${input}". Can you help me understand what this means to you?`,
+            `That's a great topic, Otieno! I'd love to learn more about your experience with "${input}".`
+        ];
+
         return {
             type: 'chat',
-            content: response,
-            sentiment: sentiment,
-            topics: topics,
-            personalRelevance: personalRelevance
+            content: defaultResponses[Math.floor(Math.random() * defaultResponses.length)]
         };
     }
 
-    generatePersonalContextualResponse(message, sentiment, topics, personalRelevance) {
-        const responses = {
-            greeting: [
-                "Hey Otieno! Good to see you again. What's on your mind today?",
-                "Hello! I'm here and ready to help with whatever you need, as always.",
-                "Hi there! How can I assist you today? I've been thinking about our last conversation."
-            ],
-            question: [
-                "That's a thoughtful question, Otieno! Let me think about this based on what I know...",
-                "Interesting question! Here's what I've learned about that topic...",
-                "I love when you ask questions like this! Let me share what I understand..."
-            ],
-            positive: [
-                "I love your enthusiasm, Otieno! That sounds really exciting.",
-                "That's fantastic! I'm excited to help you with this, knowing how passionate you get about these things.",
-                "Your energy is contagious! Let's make this happen together."
-            ],
-            negative: [
-                "I can sense this is frustrating for you, Otieno. Let me see how I can help.",
-                "I hear you. We've worked through challenges before - let's tackle this together.",
-                "That sounds tough. You know I'm always here to support you through this."
-            ],
-            personal: [
-                "I appreciate you sharing that with me, Otieno. It helps me understand you better.",
-                "Thanks for being open about that. I'm learning more about what matters to you.",
-                "That's really personal - I'm glad you feel comfortable sharing that with me."
-            ],
-            recognition: [
-                "I understand you're trying to communicate with me. What would you like to talk about?",
-                "I'm here and listening. How can I help you today?",
-                "I'm ready to assist you. What's on your mind?"
-            ],
-            default: [
-                "I'm thinking about what you've said, Otieno. This is interesting - tell me more!",
-                "That's something I'd like to explore with you. What specifically interests you about this?",
-                "I'm here and listening. I enjoy our conversations - what would you like to discuss?"
-            ]
-        };
-
-        // Determine response category
-        let category = 'default';
-        const messageLower = message.toLowerCase();
-        
-        if (messageLower.includes('hello') || messageLower.includes('hi') || messageLower.includes('hey')) {
-            category = 'greeting';
-        } else if (message.includes('?')) {
-            category = 'question';
-        } else if (messageLower.includes('what') && (messageLower.includes('this') || messageLower.includes('that'))) {
-            category = 'question';
-        } else if (personalRelevance > 0.7) {
-            category = 'personal';
-        } else if (sentiment > 0.3) {
-            category = 'positive';
-        } else if (sentiment < -0.3) {
-            category = 'negative';
+    async personalizeResponse(response, context, originalInput) {
+        if (!response || !response.content) {
+            return {
+                type: 'response',
+                content: `I understand you said "${originalInput || 'something'}". Let me help you with that, Otieno.`
+            };
         }
 
-        const responseOptions = responses[category];
-        return responseOptions[Math.floor(Math.random() * responseOptions.length)];
+        // Add personal touches based on context
+        if (context && context.user && context.user.preferences) {
+            const style = context.user.preferences.communication_style;
+            if (style === 'casual') {
+                response.content = this.makeCasual(response.content);
+            } else if (style === 'professional') {
+                response.content = this.makeProfessional(response.content);
+            }
+        }
+
+        return response;
     }
 
-    assessPersonalRelevance(message, sentiment, topics) {
-        let relevance = 0.3; // Base relevance
-        
-        // Ensure message is a string
-        if (!message || typeof message !== 'string') {
-            return relevance;
-        }
-        
-        // Check for personal pronouns and context
-        if (message.toLowerCase().includes('i ') || message.toLowerCase().includes('my ')) {
-            relevance += 0.4;
-        }
-        
-        // Check for emotional content
-        if (sentiment !== 0) {
-            relevance += 0.2;
-        }
-        
-        // Check for personal topics
-        if (!topics || !Array.isArray(topics)) {
-            topics = [];
-        }
-        const personalTopics = ['personal', 'work', 'creativity'];
-        if (topics.some(topic => personalTopics.includes(topic))) {
-            relevance += 0.3;
-        }
-        
-        return Math.min(relevance, 1.0);
+    makeCasual(content) {
+        if (!content || typeof content !== 'string') return content;
+        return content
+            .replace(/I will/, "I'll")
+            .replace(/cannot/, "can't")
+            .replace(/do not/, "don't");
+    }
+    
+    makeProfessional(content) {
+        if (!content || typeof content !== 'string') return content;
+        return content
+            .replace(/I'll/, "I will")
+            .replace(/can't/, "cannot")
+            .replace(/don't/, "do not");
     }
 
     analyzeSentiment(text) {
-        // Simple sentiment analysis
+        if (!text || typeof text !== 'string') return 0;
+        
         const positiveWords = ['good', 'great', 'awesome', 'excellent', 'love', 'like', 'happy', 'excited', 'amazing', 'wonderful', 'fantastic', 'brilliant'];
         const negativeWords = ['bad', 'terrible', 'hate', 'dislike', 'sad', 'angry', 'frustrated', 'annoying', 'awful', 'horrible', 'disappointed', 'upset'];
         
-        const words = (text || '').toLowerCase().split(/\s+/);
+        const words = text.toLowerCase().split(/\s+/);
         let score = 0;
         
         words.forEach(word => {
@@ -210,7 +233,8 @@ export class PersonalityEngine {
     }
 
     extractTopics(text) {
-        // Simple topic extraction
+        if (!text || typeof text !== 'string') return [];
+        
         const topics = [];
         const topicKeywords = {
             technology: ['code', 'programming', 'computer', 'software', 'tech', 'ai', 'machine learning', 'development', 'coding'],
@@ -219,7 +243,7 @@ export class PersonalityEngine {
             personal: ['feel', 'think', 'life', 'personal', 'family', 'friend', 'relationship', 'myself', 'i am', 'i feel']
         };
         
-        const textLower = (text || '').toLowerCase();
+        const textLower = text.toLowerCase();
         
         Object.entries(topicKeywords).forEach(([topic, keywords]) => {
             if (keywords.some(keyword => textLower.includes(keyword))) {
@@ -230,100 +254,6 @@ export class PersonalityEngine {
         return topics;
     }
 
-    async deepPersonalizeResponse(response, context) {
-        // Deep personalization based on user profile and history
-        if (context.user) {
-            // Use personal knowledge to enhance response
-            if (context.personalKnowledge && context.personalKnowledge.length > 0) {
-                const relevantKnowledge = context.personalKnowledge[0];
-                if (relevantKnowledge.type === 'personal_fact') {
-                    response.personalNote = `I remember ${relevantKnowledge.content}`;
-                }
-            }
-            
-            // Adjust based on user preferences
-            if (context.user.preferences) {
-                const style = context.user.preferences.communication_style;
-                if (style === 'casual') {
-                    response.content = this.makeCasual(response.content);
-                } else if (style === 'professional') {
-                    response.content = this.makeProfessional(response.content);
-                }
-            }
-            
-            // Add personal context based on patterns
-            if (context.user.patterns && context.user.patterns.most_active_time) {
-                const timeContext = this.getTimeBasedContext();
-                if (timeContext) {
-                    response.timeContext = timeContext;
-                }
-            }
-        }
-
-        // Adjust tone based on recent interactions
-        if (context.recentMemories && context.recentMemories.length > 0) {
-            const recentSentiment = this.analyzeRecentSentiment(context.recentMemories);
-            if (recentSentiment < -0.2) {
-                response.tone = 'supportive';
-                response.content = this.makeSupportive(response.content);
-            } else if (recentSentiment > 0.2) {
-                response.tone = 'enthusiastic';
-                response.content = this.makeEnthusiastic(response.content);
-            }
-        }
-        
-        // Increase familiarity over time
-        this.personalContext.familiarity = Math.min(this.personalContext.familiarity + 0.01, 1.0);
-
-        return response;
-    }
-    
-    makeCasual(content) {
-        return String(content || '')
-            .replace(/I will/, "I'll")
-            .replace(/cannot/, "can't")
-            .replace(/do not/, "don't");
-    }
-    
-    makeProfessional(content) {
-        return String(content || '')
-            .replace(/I'll/, "I will")
-            .replace(/can't/, "cannot")
-            .replace(/don't/, "do not");
-    }
-    
-    makeSupportive(content) {
-        const supportivePhrases = [
-            "I'm here for you, ",
-            "We can work through this together, ",
-            "I understand, "
-        ];
-        const phrase = supportivePhrases[Math.floor(Math.random() * supportivePhrases.length)];
-        return phrase + String(content || '').toLowerCase();
-    }
-    
-    makeEnthusiastic(content) {
-        return String(content || '') + " I'm excited to help with this!";
-    }
-    
-    getTimeBasedContext() {
-        const hour = new Date().getHours();
-        if (hour < 12) return "Good morning, Otieno!";
-        if (hour < 17) return "Good afternoon!";
-        if (hour < 22) return "Good evening!";
-        return "Working late tonight?";
-    }
-
-    analyzeRecentSentiment(memories) {
-        if (!memories.length) return 0;
-        
-        const sentiments = memories.map(memory => 
-            this.analyzeSentiment(memory.input || '')
-        );
-        
-        return sentiments.reduce((sum, sentiment) => sum + sentiment, 0) / sentiments.length;
-    }
-    
     adjustTrait(trait, adjustment) {
         if (this.traits[trait] !== undefined) {
             this.traits[trait] = Math.max(0, Math.min(1, this.traits[trait] + adjustment));
@@ -340,7 +270,6 @@ export class PersonalityEngine {
     }
 
     calculateCurrentMood() {
-        // Simple mood calculation based on traits
         const energy = (this.traits.proactive + (this.traits.enthusiastic || 0.7)) / 2;
         const positivity = (this.traits.helpful + this.traits.empathetic) / 2;
         const personal = this.traits.personal || 0.8;
