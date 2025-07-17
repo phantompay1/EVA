@@ -279,14 +279,14 @@ export class PersonalityEngine {
     }
     
     makeCasual(content) {
-        return content
+        return String(content || '')
             .replace(/I will/, "I'll")
             .replace(/cannot/, "can't")
             .replace(/do not/, "don't");
     }
     
     makeProfessional(content) {
-        return content
+        return String(content || '')
             .replace(/I'll/, "I will")
             .replace(/can't/, "cannot")
             .replace(/don't/, "do not");
@@ -299,11 +299,11 @@ export class PersonalityEngine {
             "I understand, "
         ];
         const phrase = supportivePhrases[Math.floor(Math.random() * supportivePhrases.length)];
-        return phrase + content.toLowerCase();
+        return phrase + String(content || '').toLowerCase();
     }
     
     makeEnthusiastic(content) {
-        return content + " I'm excited to help with this!";
+        return String(content || '') + " I'm excited to help with this!";
     }
     
     getTimeBasedContext() {
