@@ -143,14 +143,30 @@ export class EVACore {
                 offlineMode: true
             };
 
-            return await this.personality.generateResponse(command, originalInput, context);
+            const response = await this.personality.generateResponse(command, originalInput, context);
+            
+            // Ensure response has proper structure
+            if (!response || !response.content) {
+                return {
+                    type: 'response',
+                    content: `I understand you said "${originalInput}". Let me help you with that, Otieno.`,
+                    timestamp: new Date()
+                };
+            }
+            
+            return {
+                type: response.type || 'response',
+                content: response.content,
+                timestamp: new Date(),
+                ...response
+            };
         } catch (error) {
             console.error('Response generation error:', error);
             
             // Fallback response generation
             return {
                 type: 'response',
-                content: `I'm processing what you said: "${originalInput}". Let me think about how I can help you with this, Otieno.`,
+                content: `I'm having a small technical hiccup, but I'm here for you, Otieno. What would you like to talk about?`,
                 timestamp: new Date()
             };
         }

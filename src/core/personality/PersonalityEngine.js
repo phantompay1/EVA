@@ -102,6 +102,132 @@ export class PersonalityEngine {
         };
     }
 
+    generatePersonalContextualResponse(message, sentiment, topics, personalRelevance) {
+        const responses = {
+            greeting: [
+                "Hey Otieno! Good to see you again. What's on your mind today?",
+                "Hello! I'm here and ready to help with whatever you need, as always.",
+                "Hi there! How can I assist you today? I've been thinking about our last conversation."
+            ],
+            question: [
+                "That's a thoughtful question, Otieno! Let me think about this based on what I know...",
+                "Interesting question! Here's what I've learned about that topic...",
+                "I love when you ask questions like this! Let me share what I understand..."
+            ],
+            positive: [
+                "I love your enthusiasm, Otieno! That sounds really exciting.",
+                "That's fantastic! I'm excited to help you with this, knowing how passionate you get about these things.",
+                "Your energy is contagious! Let's make this happen together."
+            ],
+            negative: [
+                "I can sense this is frustrating for you, Otieno. Let me see how I can help.",
+                "I hear you. We've worked through challenges before - let's tackle this together.",
+                "That sounds tough. You know I'm always here to support you through this."
+            ],
+            personal: [
+                "I appreciate you sharing that with me, Otieno. It helps me understand you better.",
+                "Thanks for being open about that. I'm learning more about what matters to you.",
+                "That's really personal - I'm glad you feel comfortable sharing that with me."
+            ],
+            recognition: [
+                "I understand you're trying to communicate with me. What would you like to talk about?",
+                "I'm here and listening. How can I help you today?",
+                "I'm ready to assist you. What's on your mind?"
+            ],
+            default: [
+                "I'm thinking about what you've said, Otieno. This is interesting - tell me more!",
+                "That's something I'd like to explore with you. What specifically interests you about this?",
+                "I'm here and listening. I enjoy our conversations - what would you like to discuss?"
+            ]
+        };
+
+        // Determine response category
+        let category = 'default';
+        const messageLower = message.toLowerCase();
+        
+        if (messageLower.includes('hello') || messageLower.includes('hi') || messageLower.includes('hey')) {
+            category = 'greeting';
+        } else if (message.includes('?')) {
+            category = 'question';
+        } else if (messageLower.includes('what') && (messageLower.includes('this') || messageLower.includes('that'))) {
+            category = 'question';
+        } else if (personalRelevance > 0.7) {
+            category = 'personal';
+        } else if (sentiment > 0.3) {
+            category = 'positive';
+        } else if (sentiment < -0.3) {
+            category = 'negative';
+        }
+
+        const responseOptions = responses[category];
+        return responseOptions[Math.floor(Math.random() * responseOptions.length)];
+    }
+
+    assessPersonalRelevance(message, sentiment, topics) {
+        let relevance = 0.3; // Base relevance
+        
+        // Check for personal pronouns and context
+        if (message.toLowerCase().includes('i ') || message.toLowerCase().includes('my ')) {
+            relevance += 0.4;
+        }
+        
+        // Check for emotional content
+        if (sentiment !== 0) {
+            relevance += 0.2;
+        }
+        
+        // Check for personal topics
+        const personalTopics = ['personal', 'work', 'creativity'];
+        if (topics.some(topic => personalTopics.includes(topic))) {
+            relevance += 0.3;
+        }
+        
+        return Math.min(relevance, 1.0);
+    }
+
+    analyzeSentiment(text) {
+        // Simple sentiment analysis
+        const positiveWords = ['good', 'great', 'awesome', 'excellent', 'love', 'like', 'happy', 'excited', 'amazing', 'wonderful', 'fantastic', 'brilliant'];
+        const negativeWords = ['bad', 'terrible', 'hate', 'dislike', 'sad', 'angry', 'frustrated', 'annoying', 'awful', 'horrible', 'disappointed', 'upset'];
+        
+        const words = text.toLowerCase().split(/\s+/);
+        let score = 0;
+        
+        words.forEach(word => {
+            if (positiveWords.includes(word)) score += 1;
+            if (negativeWords.includes(word)) score -= 1;
+        });
+        
+        return words.length > 0 ? score / words.length : 0;
+    }
+
+    extractTopics(text) {
+        // Simple topic extraction
+        const topics = [];
+        const topicKeywords = {
+            technology: ['code', 'programming', 'computer', 'software', 'tech', 'ai', 'machine learning', 'development', 'coding'],
+            creativity: ['create', 'design', 'art', 'music', 'write', 'creative', 'imagine'],
+            work: ['work', 'job', 'project', 'task', 'business', 'meeting', 'deadline', 'career'],
+            personal: ['feel', 'think', 'life', 'personal', 'family', 'friend', 'relationship', 'myself', 'i am', 'i feel']
+        };
+        
+        const textLower = text.toLowerCase();
+        
+        Object.entries(topicKeywords).forEach(([topic, keywords]) => {
+            if (keywords.some(keyword => textLower.includes(keyword))) {
+                topics.push(topic);
+            }
+        });
+        
+        return topics;
+    }
+            content: response,
+            sentiment: sentiment,
+            topics: topics,
+            personalRelevance: personalRelevance
+        };
+    }
+
     assessPersonalRelevance(message, sentiment, topics) {
         let relevance = 0.3; // Base relevance
         
