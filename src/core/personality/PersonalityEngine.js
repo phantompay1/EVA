@@ -97,6 +97,12 @@ export class PersonalityEngine {
                     content: `I'm online and ready to help you, Otieno! My systems are running well and I'm learning more about you with each conversation. How can I assist you today?`
                 };
 
+            case 'tech_knowledge':
+                return await this.handleTechKnowledge(command, context);
+
+            case 'knowledge_search':
+                return await this.handleKnowledgeSearch(command, context);
+
             case 'chat':
             default:
                 return await this.generateChatResponse(input);
@@ -266,6 +272,77 @@ export class PersonalityEngine {
             style: this.responseStyles,
             mood: this.calculateCurrentMood(),
             personalContext: this.personalContext
+        };
+    }
+
+    async handleTechKnowledge(command, context) {
+        const query = command.query || '';
+        
+        if (!query) {
+            return {
+                type: 'response',
+                content: 'What would you like me to explain? I have knowledge about programming, AI, web development, mobile development, cloud computing, and many other tech topics.'
+            };
+        }
+
+        // Search for relevant knowledge
+        let relevantKnowledge = [];
+        if (context.knowledge) {
+            try {
+                relevantKnowledge = await context.knowledge.searchKnowledge(query);
+            } catch (error) {
+                console.warn('Knowledge search error:', error);
+            }
+        }
+
+        if (relevantKnowledge.length > 0) {
+            const topResult = relevantKnowledge[0];
+            return {
+                type: 'response',
+                content: `📚 **${query.charAt(0).toUpperCase() + query.slice(1)}:**\n\n${topResult.content}\n\n${relevantKnowledge.length > 1 ? `I have ${relevantKnowledge.length - 1} more related topics if you'd like to explore further.` : 'Would you like me to explain any specific aspect in more detail?'}`
+            };
+        }
+
+        // Fallback response for unknown topics
+        return {
+            type: 'response',
+            content: `I don't have specific information about "${query}" in my current knowledge base, but I'd be happy to help you research it or discuss related topics I do know about. What specific aspect interests you most?`
+        };
+    }
+
+    async handleKnowledgeSearch(command, context) {
+        const query = command.query || '';
+        
+        if (!query) {
+            return {
+                type: 'response',
+                content: 'What would you like me to search for? I can look through my knowledge base covering technology, programming, AI, and many other topics.'
+            };
+        }
+
+        let searchResults = [];
+        if (context.knowledge) {
+            try {
+                searchResults = await context.knowledge.searchKnowledge(query);
+            } catch (error) {
+                console.warn('Knowledge search error:', error);
+            }
+        }
+
+        if (searchResults.length === 0) {
+            return {
+                type: 'response',
+                content: `🔍 No results found for "${query}". Try searching for related terms like programming languages, frameworks, AI concepts, or development tools.`
+            };
+        }
+
+        const resultsList = searchResults.slice(0, 5).map((result, index) => 
+            `${index + 1}. **${result.topic}**: ${result.content.substring(0, 100)}...`
+        ).join('\n\n');
+
+        return {
+            type: 'response',
+            content: `🔍 **Search Results for "${query}":**\n\n${resultsList}\n\n${searchResults.length > 5 ? `Found ${searchResults.length} total results. ` : ''}Ask me about any specific topic for more details!`
         };
     }
 

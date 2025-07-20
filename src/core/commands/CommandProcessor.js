@@ -64,13 +64,25 @@ export class CommandProcessor {
 
         // Personal knowledge commands
         this.commands.set('personal_knowledge', {
-            pattern: /^(what do you know about me|what have you learned about me|tell me about myself|what do you remember about me|show me what you know)/i,
+            pattern: /^(what do you know about me|what have you learned about me|tell me about myself|what do you remember about me|show me what you know|my profile|my information)/i,
             handler: this.handlePersonalKnowledge.bind(this)
         });
 
         this.commands.set('learning_process', {
-            pattern: /^(how are you learning about me|how do you learn|explain your learning|learning process|how do you adapt)/i,
+            pattern: /^(how are you learning about me|how do you learn|explain your learning|learning process|how do you adapt|how does eva learn)/i,
             handler: this.handleLearningProcess.bind(this)
+        });
+
+        // Technical knowledge commands
+        this.commands.set('tech_knowledge', {
+            pattern: /^(tell me about|what is|explain|define|how does|what are)/i,
+            handler: this.handleTechKnowledge.bind(this)
+        });
+
+        // Knowledge search commands
+        this.commands.set('knowledge_search', {
+            pattern: /^(search knowledge|find information|look up|search for)/i,
+            handler: this.handleKnowledgeSearch.bind(this)
         });
     }
 
@@ -243,6 +255,24 @@ I'm here, learning about you, and ready to help with anything you need, Otieno.`
         return {
             type: 'learning_process',
             message: 'Explaining how I learn and adapt to you...'
+        };
+    }
+
+    async handleTechKnowledge(command) {
+        const query = command.input.replace(/^(tell me about|what is|explain|define|how does|what are)\s*/i, '');
+        return {
+            type: 'tech_knowledge',
+            query: query,
+            message: `Looking up information about: "${query}"`
+        };
+    }
+
+    async handleKnowledgeSearch(command) {
+        const query = command.input.replace(/^(search knowledge|find information|look up|search for)\s*/i, '');
+        return {
+            type: 'knowledge_search',
+            query: query,
+            message: `Searching knowledge base for: "${query}"`
         };
     }
 }
