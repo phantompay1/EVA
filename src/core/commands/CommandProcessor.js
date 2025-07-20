@@ -61,6 +61,17 @@ export class CommandProcessor {
             pattern: /^(speak (slower|faster)|speech speed)/i,
             handler: this.handleSpeechSpeed.bind(this)
         });
+
+        // Personal knowledge commands
+        this.commands.set('personal_knowledge', {
+            pattern: /^(what do you know about me|what have you learned about me|tell me about myself|what do you remember about me|show me what you know)/i,
+            handler: this.handlePersonalKnowledge.bind(this)
+        });
+
+        this.commands.set('learning_process', {
+            pattern: /^(how are you learning about me|how do you learn|explain your learning|learning process|how do you adapt)/i,
+            handler: this.handleLearningProcess.bind(this)
+        });
     }
 
     async parse(input) {
@@ -218,6 +229,20 @@ I'm here, learning about you, and ready to help with anything you need, Otieno.`
             action: 'adjust_speed',
             speed: speed,
             message: `🎤 Adjusting speech speed to ${speed}...`
+        };
+    }
+
+    async handlePersonalKnowledge(command) {
+        return {
+            type: 'personal_knowledge',
+            message: 'Gathering what I know about you...'
+        };
+    }
+
+    async handleLearningProcess(command) {
+        return {
+            type: 'learning_process',
+            message: 'Explaining how I learn and adapt to you...'
         };
     }
 }

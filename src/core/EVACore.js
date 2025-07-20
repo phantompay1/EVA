@@ -140,7 +140,11 @@ export class EVACore {
                 currentContext: this.currentContext,
                 recentMemories: await this.getRecentMemoriesSafe(),
                 personalKnowledge: await this.getPersonalKnowledgeSafe(originalInput),
-                offlineMode: true
+                offlineMode: true,
+                knowledge: this.knowledge,
+                learning: this.learning,
+                personalDB: this.personalDB,
+                eva: this
             };
 
             const response = await this.personality.generateResponse(command, originalInput, context);

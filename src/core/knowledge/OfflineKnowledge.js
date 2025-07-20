@@ -64,6 +64,55 @@ export class OfflineKnowledge {
                 importance: 0.9
             },
             {
+                id: 'professional_background',
+                topic: 'personal',
+                content: 'Otieno is a software developer with experience in web development, mobile apps, and AI systems',
+                type: 'personal_fact',
+                importance: 0.9
+            },
+            {
+                id: 'technical_interests',
+                topic: 'technology',
+                content: 'Otieno is particularly interested in AI, machine learning, mobile app development, and creating innovative software solutions',
+                type: 'personal_fact',
+                importance: 0.8
+            },
+            {
+                id: 'current_projects',
+                topic: 'work',
+                content: 'Otieno is currently working on various projects including AI assistants and mobile applications',
+                type: 'personal_fact',
+                importance: 0.8
+            },
+            {
+                id: 'learning_style',
+                topic: 'personal',
+                content: 'Otieno prefers hands-on learning and practical implementation over theoretical discussions',
+                type: 'personal_fact',
+                importance: 0.7
+            },
+            {
+                id: 'communication_preference',
+                topic: 'personal',
+                content: 'Otieno appreciates direct, helpful responses and values efficiency in communication',
+                type: 'personal_fact',
+                importance: 0.7
+            },
+            {
+                id: 'goals',
+                topic: 'personal',
+                content: 'Otieno aims to build innovative AI solutions and improve his development skills continuously',
+                type: 'personal_fact',
+                importance: 0.8
+            },
+            {
+                id: 'work_environment',
+                topic: 'work',
+                content: 'Otieno works on multiple projects simultaneously and values tools that help with productivity and organization',
+                type: 'personal_fact',
+                importance: 0.7
+            },
+            {
                 id: 'ai_knowledge',
                 topic: 'technology',
                 content: 'Artificial Intelligence involves machine learning, neural networks, and automation',
