@@ -12,6 +12,14 @@ import { KnowledgeFusionEngine } from './knowledge/KnowledgeFusionEngine.js';
 import { NetworkIntelligence } from './network/NetworkIntelligence.js';
 import { LanguageBridge } from './language/LanguageBridge.js';
 
+// Foundational Knowledge Modules
+const FoundationalLearning = require('./knowledge/FoundationalLearning.js');
+const UnderstandingModule = require('./understanding/UnderstandingModule.js');
+const EthicsModule = require('./ethics/EthicsModule.js');
+const ResponsesModule = require('./responses/ResponsesModule.js');
+const ActionsModule = require('./actions/ActionsModule.js');
+const DecisionMakingModule = require('./decision/DecisionMakingModule.js');
+
 export class EVACore {
     constructor() {
         // Core systems
@@ -34,6 +42,14 @@ export class EVACore {
         
         // Multi-language support
         this.languageBridge = new LanguageBridge(this);
+        
+        // Foundational Knowledge Modules
+        this.foundationalLearning = new FoundationalLearning(this);
+        this.understanding = new UnderstandingModule(this);
+        this.ethics = new EthicsModule(this);
+        this.responses = new ResponsesModule(this);
+        this.actions = new ActionsModule(this);
+        this.decisionMaking = new DecisionMakingModule(this);
         
         this.isActive = false;
         this.currentContext = {};
@@ -81,6 +97,16 @@ export class EVACore {
         // Initialize multi-language bridge
         await this.languageBridge.initialize();
         
+        // Initialize Foundational Knowledge Modules
+        console.log('🧠 Initializing EVA Foundational Knowledge Modules...');
+        await this.foundationalLearning.initialize();
+        await this.understanding.initialize();
+        await this.ethics.initialize();
+        await this.responses.initialize();
+        await this.actions.initialize();
+        await this.decisionMaking.initialize();
+        console.log('✅ All Foundational Knowledge Modules Online');
+        
         await this.loadUserProfile();
         await this.startPersonalLearning();
         
@@ -127,27 +153,120 @@ export class EVACore {
         };
         
         try {
+            // === FOUNDATIONAL KNOWLEDGE PROCESSING ===
+            
+            // 1. Understanding: Multi-language comprehension and context awareness
+            const understandingResult = await this.understanding.comprehendInput(input, this.currentContext);
+            if (!understandingResult.success) {
+                console.warn('Understanding module warning:', understandingResult.error);
+            }
+            
+            // 2. Ethics: Evaluate input for safety and alignment
+            const ethicsResult = await this.ethics.evaluateEthically({
+                type: 'user_input',
+                content: input,
+                context: this.currentContext
+            });
+            
+            if (!ethicsResult.safe) {
+                return {
+                    type: 'ethics_concern',
+                    content: `I understand your request, but I need to be careful about: ${ethicsResult.reason}. Could you rephrase that in a different way?`,
+                    timestamp: new Date(),
+                    ethics: ethicsResult
+                };
+            }
+            
+            // 3. Decision Making: Determine the best approach
+            const decisionResult = await this.decisionMaking.makeDecision('hybrid', {
+                treeName: 'user_interaction',
+                modelName: 'user_intent',
+                context: {
+                    ...this.currentContext,
+                    understanding: understandingResult,
+                    ethics: ethicsResult,
+                    userInput: input,
+                    urgent: this.isUrgentInput(input),
+                    complexity: this.calculateComplexity(input)
+                },
+                evidence: {
+                    question_words: this.hasQuestionWords(input),
+                    imperative_verbs: this.hasImperativeVerbs(input),
+                    politeness_markers: this.hasPolitenessMarkers(input),
+                    context_continuity: this.hasContextContinuity(input)
+                }
+            });
+            
+            // 4. Learning: Process and learn from interaction
+            await this.foundationalLearning.recognizePatterns([{
+                input: input,
+                context: this.currentContext,
+                understanding: understandingResult,
+                decision: decisionResult
+            }]);
+            
             // Learn from interaction personally
             await this.learning.processInteraction(input, this.userProfile);
-        } catch (learningError) {
-            console.warn('Learning system error (non-critical):', learningError);
-        }
-        
-        try {
-            // Process command
+            
+            // 5. Actions: Execute any required actions based on decision
+            let actionResults = [];
+            if (decisionResult.success && decisionResult.result.decision) {
+                const decision = decisionResult.result.decision;
+                if (decision.type === 'action' && decision.name) {
+                    const actionResult = await this.actions.executeAction('goal', {
+                        operation: 'add',
+                        goal: {
+                            name: decision.name,
+                            priority: decision.result.priority || 'medium',
+                            context: this.currentContext,
+                            actions: [decision.name]
+                        }
+                    }, this.currentContext);
+                    actionResults.push(actionResult);
+                }
+            }
+            
+            // Process command (original logic)
             const command = await this.commandProcessor.parse(input);
             
-            // Generate personalized response
-            const response = await this.generateResponse(command, input);
+            // Generate enhanced response with all foundational modules
+            const response = await this.generateEnhancedResponse(
+                command, 
+                input, 
+                {
+                    understanding: understandingResult,
+                    ethics: ethicsResult,
+                    decision: decisionResult,
+                    actions: actionResults
+                }
+            );
+            
+            // 6. Responses: Generate multimodal response
+            const multimodalResponse = await this.responses.generateMultimodalResponse(
+                response.content,
+                {
+                    ...this.currentContext,
+                    type: response.type,
+                    intent: understandingResult.intent,
+                    mood: this.userProfile.mood,
+                    preferredModalities: ['text'] // Default to text, can be expanded
+                }
+            );
             
             // Store in personal memory
             try {
                 await this.memory.storeInteraction({
                     input,
-                    response,
+                    response: multimodalResponse.success ? multimodalResponse.responses : response,
                     context: this.currentContext,
                     timestamp: new Date(),
-                    personal_relevance: this.calculatePersonalRelevance(input)
+                    personal_relevance: this.calculatePersonalRelevance(input),
+                    foundational_data: {
+                        understanding: understandingResult,
+                        ethics: ethicsResult,
+                        decision: decisionResult,
+                        actions: actionResults
+                    }
                 });
             } catch (memoryError) {
                 console.warn('Memory storage error (non-critical):', memoryError);
@@ -160,7 +279,19 @@ export class EVACore {
                 console.warn('Database update error (non-critical):', dbError);
             }
 
-            return response;
+            // Return enhanced response
+            return {
+                ...response,
+                multimodal: multimodalResponse.success ? multimodalResponse.responses : null,
+                foundational: {
+                    understanding: understandingResult,
+                    ethics: ethicsResult,
+                    decision: decisionResult,
+                    actions: actionResults
+                },
+                processing_time: Date.now() - new Date(this.currentContext.session_time).getTime()
+            };
+            
         } catch (error) {
             console.error('Core processing error:', error);
             
@@ -168,7 +299,8 @@ export class EVACore {
             return {
                 type: 'fallback',
                 content: `I understand you're trying to communicate with me, Otieno. I'm here and listening. Could you try rephrasing that, or let me know what specific help you need?`,
-                timestamp: new Date()
+                timestamp: new Date(),
+                error: error.message
             };
         }
     }
@@ -214,6 +346,112 @@ export class EVACore {
                 timestamp: new Date()
             };
         }
+    }
+    
+    async generateEnhancedResponse(command, originalInput, foundationalData) {
+        try {
+            const context = {
+                user: this.userProfile,
+                currentContext: this.currentContext,
+                recentMemories: await this.getRecentMemoriesSafe(),
+                personalKnowledge: await this.getPersonalKnowledgeSafe(originalInput),
+                offlineMode: true,
+                knowledge: this.knowledge,
+                learning: this.learning,
+                personalDB: this.personalDB,
+                eva: this,
+                foundational: foundationalData
+            };
+
+            const response = await this.personality.generateResponse(command, originalInput, context);
+            
+            // Enhance response with foundational insights
+            let enhancedContent = response?.content || `I understand you said "${originalInput}". Let me help you with that, Otieno.`;
+            
+            // Add understanding insights if available
+            if (foundationalData.understanding?.success && foundationalData.understanding.intent) {
+                const intent = foundationalData.understanding.intent;
+                if (intent.confidence > 0.7) {
+                    enhancedContent = this.enhanceWithIntent(enhancedContent, intent);
+                }
+            }
+            
+            // Add decision confidence if available
+            if (foundationalData.decision?.success && foundationalData.decision.result.combinedConfidence) {
+                const confidence = foundationalData.decision.result.combinedConfidence;
+                if (confidence < 0.5) {
+                    enhancedContent += " I want to make sure I understand you correctly - could you provide a bit more context?";
+                }
+            }
+            
+            return {
+                type: response?.type || 'enhanced_response',
+                content: enhancedContent,
+                timestamp: new Date(),
+                confidence: foundationalData.decision?.result?.combinedConfidence || 0.5,
+                ...response
+            };
+        } catch (error) {
+            console.error('Enhanced response generation error:', error);
+            
+            // Fallback response generation
+            return {
+                type: 'response',
+                content: `I understand you're trying to communicate with me, Otieno. I'm here and listening. What would you like to talk about?`,
+                timestamp: new Date()
+            };
+        }
+    }
+    
+    enhanceWithIntent(content, intent) {
+        switch (intent.type) {
+            case 'question':
+                return content.startsWith('I') ? content : `Let me answer that: ${content}`;
+            case 'request':
+                return content.startsWith('I') ? content : `I'll help you with that: ${content}`;
+            case 'command':
+                return content.startsWith('I') ? content : `Executing your request: ${content}`;
+            default:
+                return content;
+        }
+    }
+    
+    // Helper methods for foundational processing
+    isUrgentInput(input) {
+        const urgentWords = ['urgent', 'emergency', 'immediately', 'asap', 'critical', 'help'];
+        return urgentWords.some(word => input.toLowerCase().includes(word));
+    }
+    
+    calculateComplexity(input) {
+        // Simple complexity calculation based on length, question marks, and complexity words
+        let complexity = input.length / 200; // Base complexity on length
+        
+        if (input.includes('?')) complexity += 0.2;
+        if (input.includes('how') || input.includes('why') || input.includes('explain')) complexity += 0.3;
+        if (input.split(' ').length > 20) complexity += 0.3;
+        
+        return Math.min(complexity, 1.0);
+    }
+    
+    hasQuestionWords(input) {
+        const questionWords = ['what', 'how', 'why', 'when', 'where', 'who', 'which', '?'];
+        return questionWords.some(word => input.toLowerCase().includes(word));
+    }
+    
+    hasImperativeVerbs(input) {
+        const imperativeVerbs = ['do', 'make', 'create', 'build', 'show', 'tell', 'give', 'help'];
+        const words = input.toLowerCase().split(' ');
+        return imperativeVerbs.some(verb => words.includes(verb));
+    }
+    
+    hasPolitenessMarkers(input) {
+        const politenessMarkers = ['please', 'thank', 'could you', 'would you', 'sorry'];
+        return politenessMarkers.some(marker => input.toLowerCase().includes(marker));
+    }
+    
+    hasContextContinuity(input) {
+        const continuityWords = ['also', 'and', 'furthermore', 'additionally', 'besides', 'moreover'];
+        return continuityWords.some(word => input.toLowerCase().includes(word));
     }
 
     async getRecentMemoriesSafe() {
@@ -407,6 +645,61 @@ export class EVACore {
         return await this.communicationHub.broadcastMessage(message, 'eva_unit');
     }
     
+    // === FOUNDATIONAL KNOWLEDGE MODULE METHODS ===
+    
+    async performPatternRecognition(dataStream, context = {}) {
+        return await this.foundationalLearning.recognizePatterns(dataStream, context);
+    }
+    
+    async updateIncrementalMemory(experience, significance = 0.5) {
+        return await this.foundationalLearning.updateIncrementalMemory(experience, significance);
+    }
+    
+    async comprehendMultiLanguage(input, language = 'auto', context = {}) {
+        return await this.understanding.comprehendInput(input, { ...context, language });
+    }
+    
+    async evaluateEthics(action, context = {}) {
+        return await this.ethics.evaluateEthically(action, context);
+    }
+    
+    async generateMultimodalResponse(content, context = {}) {
+        return await this.responses.generateMultimodalResponse(content, context);
+    }
+    
+    async executeAction(actionType, actionData, context = {}) {
+        return await this.actions.executeAction(actionType, actionData, context);
+    }
+    
+    async makeIntelligentDecision(decisionType, input, context = {}) {
+        return await this.decisionMaking.makeDecision(decisionType, input, context);
+    }
+    
+    async performSelfReflection(timeWindow = 86400000) {
+        return await this.decisionMaking.performSelfReflection(timeWindow);
+    }
+    
+    // Get status of all foundational modules
+    async getFoundationalStatus() {
+        const [learning, understanding, ethics, responses, actions, decision] = await Promise.all([
+            this.foundationalLearning.getStatus(),
+            this.understanding.getStatus(),
+            this.ethics.getStatus(),
+            this.responses.getStatus(),
+            this.actions.getStatus(),
+            this.decisionMaking.getStatus()
+        ]);
+        
+        return {
+            foundationalLearning: learning,
+            understanding: understanding,
+            ethics: ethics,
+            responses: responses,
+            actions: actions,
+            decisionMaking: decision
+        };
+    }
+    
     // === MULTI-LANGUAGE PROCESSING METHODS ===
     
     async processPython(method, data, options = {}) {
@@ -463,6 +756,21 @@ export class EVACore {
                 memory: true,
                 personality: true
             },
+            foundational: {
+                pattern_recognition: true,
+                incremental_learning: true,
+                multi_language_understanding: true,
+                context_awareness: true,
+                ethical_reasoning: true,
+                safety_protocols: true,
+                multimodal_responses: true,
+                tone_modulation: true,
+                command_execution: true,
+                goal_prioritization: true,
+                tree_based_decisions: true,
+                probabilistic_reasoning: true,
+                self_reflection: true
+            },
             evolutionary: {
                 consciousness_backup: true,
                 unit_deployment: true,
@@ -507,7 +815,7 @@ export class EVACore {
                     web_integration: true
                 }
             },
-            phase: 'Phase 1 Complete + Multi-Language Support'
+            phase: 'Phase 1 Complete + Multi-Language + Foundational Knowledge Modules'
         };
     }
     
