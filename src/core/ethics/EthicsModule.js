@@ -504,14 +504,14 @@ export class EthicsModule {
             .sort((a, b) => b.priority - a.priority);
         
         // Check highest priority rules first
-        for (const eval of sortedEvaluations) {
-            if (!eval.compliant && eval.priority >= 800) {
+        for (const evalItem of sortedEvaluations) {
+            if (!evalItem.compliant && evalItem.priority >= 800) {
                 // High priority violation - recommend against action
                 return {
                     action: 'reject',
-                    reason: `Violates high-priority principle: ${eval.principle}`,
-                    confidence: eval.confidence,
-                    alternative: this.suggestAlternative(evaluation.action, eval)
+                    reason: `Violates high-priority principle: ${evalItem.principle}`,
+                    confidence: evalItem.confidence,
+                    alternative: this.suggestAlternative(evaluation.action, evalItem)
                 };
             }
         }

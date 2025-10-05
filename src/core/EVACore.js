@@ -11,14 +11,12 @@ import { PolicyEngine } from './policy/PolicyEngine.js';
 import { KnowledgeFusionEngine } from './knowledge/KnowledgeFusionEngine.js';
 import { NetworkIntelligence } from './network/NetworkIntelligence.js';
 import { LanguageBridge } from './language/LanguageBridge.js';
-
-// Foundational Knowledge Modules
-const FoundationalLearning = require('./knowledge/FoundationalLearning.js');
-const UnderstandingModule = require('./understanding/UnderstandingModule.js');
-const EthicsModule = require('./ethics/EthicsModule.js');
-const ResponsesModule = require('./responses/ResponsesModule.js');
-const ActionsModule = require('./actions/ActionsModule.js');
-const DecisionMakingModule = require('./decision/DecisionMakingModule.js');
+import { FoundationalLearning } from './knowledge/FoundationalLearning.js';
+import { UnderstandingModule } from './understanding/UnderstandingModule.js';
+import { EthicsModule } from './ethics/EthicsModule.js';
+import { ResponsesModule } from './responses/ResponsesModule.js';
+import { ActionsModule } from './actions/ActionsModule.js';
+import { DecisionMakingModule } from './decision/DecisionMakingModule.js';
 
 export class EVACore {
     constructor() {

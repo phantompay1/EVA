@@ -609,4 +609,4 @@ class DecisionMakingModule extends EventEmitter {
     }
 }
 
-module.exports = DecisionMakingModule;
+export { DecisionMakingModule };

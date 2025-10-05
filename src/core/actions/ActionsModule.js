@@ -649,4 +649,4 @@ class ActionsModule extends EventEmitter {
     }
 }
 
-module.exports = ActionsModule;
+export { ActionsModule };

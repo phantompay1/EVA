@@ -685,4 +685,4 @@ class ResponsesModule extends EventEmitter {
     }
 }
 
-module.exports = ResponsesModule;
+export { ResponsesModule };
