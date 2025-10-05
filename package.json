@@ -1,14 +1,24 @@
 {
   "name": "eva-assistant",
-  "version": "1.0.0",
-  "description": "EVA - Enhanced Virtual Assistant - Your Living AI Companion",
+  "version": "2.0.0",
+  "description": "EVA - Evolutionary Virtual Android - Multi-Language AI System",
   "main": "src/main.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node src/server/main.js"
+    "start": "node src/server/main.js",
+    "python": "python src/python/eva_core.py",
+    "rust": "cargo run --manifest-path Cargo.toml",
+    "cpp": "cmake -B build && cmake --build build",
+    "test": "node src/tests/multi-language-test.js",
+    "test:python": "python -m pytest src/python/tests/",
+    "test:rust": "cargo test",
+    "test:cpp": "cd build && ctest",
+    "install:python": "pip install -r requirements.txt",
+    "install:rust": "cargo build",
+    "install:cpp": "cmake -B build"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -20,5 +30,27 @@
   "devDependencies": {
     "vite": "^5.0.0",
     "nodemon": "^3.0.2"
-  }
+  },
+  "keywords": [
+    "ai",
+    "virtual-assistant", 
+    "evolutionary-ai",
+    "multi-language",
+    "python",
+    "rust",
+    "cpp",
+    "javascript",
+    "machine-learning",
+    "performance"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.9",
+    "rust": ">=1.70"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/eva.git"
+  },
+  "license": "MIT"
 }
