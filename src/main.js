@@ -242,3 +242,89 @@ class EVAApp {
 document.addEventListener('DOMContentLoaded', () => {
     new EVAApp();
 });
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('✅ Service Worker registered successfully:', registration.scope);
+
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            if (confirm('New version available! Reload to update?')) {
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                window.location.reload();
+                            }
+                        }
+                    });
+                });
+            })
+            .catch((error) => {
+                console.warn('⚠️ Service Worker registration failed:', error);
+            });
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+                refreshing = true;
+                window.location.reload();
+            }
+        });
+    });
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    console.log('💾 PWA install prompt available');
+    showInstallPromotion();
+});
+
+window.addEventListener('appinstalled', () => {
+    console.log('✅ PWA installed successfully');
+    deferredPrompt = null;
+});
+
+function showInstallPromotion() {
+    const installBanner = document.createElement('div');
+    installBanner.id = 'install-banner';
+    installBanner.innerHTML = `
+        <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+                    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                    color: white; padding: 16px 24px; border-radius: 12px;
+                    box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 10000;
+                    display: flex; align-items: center; gap: 16px; max-width: 90vw;">
+            <span style="font-weight: 600;">Install EVA for offline access</span>
+            <button id="install-btn" style="background: white; color: #3b82f6; border: none;
+                                            padding: 8px 16px; border-radius: 8px; font-weight: 600;
+                                            cursor: pointer;">Install</button>
+            <button id="install-dismiss" style="background: transparent; color: white; border: none;
+                                                  padding: 8px; cursor: pointer; font-size: 20px;">×</button>
+        </div>
+    `;
+
+    document.body.appendChild(installBanner);
+
+    document.getElementById('install-btn').addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log('User response to install prompt:', outcome);
+            deferredPrompt = null;
+            installBanner.remove();
+        }
+    });
+
+    document.getElementById('install-dismiss').addEventListener('click', () => {
+        installBanner.remove();
+    });
+
+    setTimeout(() => {
+        if (document.getElementById('install-banner')) {
+            installBanner.remove();
+        }
+    }, 10000);
+}
